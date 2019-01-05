@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SnapKit
 
 extension UIScrollView {
     var maxContentOffset: CGPoint {
@@ -24,11 +23,14 @@ class MenuContents: UIView {
     private let tintView = UIView()
     private let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
     private let scrollContainer = UIView()
+	private var scrollContainerConstraints = [NSLayoutConstraint]()
     private let scrollView = UIScrollView()
+	private var scrollViewConstraints = [NSLayoutConstraint]()
     
     let stackView: UIStackView
     
     private let titleLabel = UILabel()
+	private var titleLabelConstraints = [NSLayoutConstraint]()
     
     private let radius: CGFloat
     
@@ -160,34 +162,31 @@ class MenuContents: UIView {
         let itemViews: [MenuViewType] = items.map {
             let item = $0.view
             item.applyTheme(theme)
+			item.translatesAutoresizingMaskIntoConstraints = false
             return item
         }
         
+		shadowView.translatesAutoresizingMaskIntoConstraints = false
+		tintView.translatesAutoresizingMaskIntoConstraints = false
+		effectView.translatesAutoresizingMaskIntoConstraints = false
+		scrollContainer.translatesAutoresizingMaskIntoConstraints = false
+		scrollView.translatesAutoresizingMaskIntoConstraints = false
+		titleLabel.translatesAutoresizingMaskIntoConstraints = false
+		
         stackView = UIStackView(arrangedSubviews: itemViews)
-        
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+		
         self.maxHeight = maxHeight
         self.items = items
         self.radius = radius
         
         super.init(frame: .zero)
+		translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.text = name
         
         addSubview(shadowView)
-        
-        shadowView.snp.makeConstraints {
-            make in
-            
-            make.edges.equalToSuperview().inset(-20)
-        }
-        
         addSubview(effectView)
-        
-        effectView.snp.makeConstraints {
-            make in
-            
-            make.edges.equalToSuperview()
-        }
         
         effectView.contentView.addSubview(tintView)
         effectView.contentView.addSubview(titleLabel)
@@ -195,35 +194,55 @@ class MenuContents: UIView {
         
         scrollContainer.addSubview(scrollView)
         scrollView.addSubview(stackView)
-        
-        scrollContainer.snp.makeConstraints {
-            make in
-            make.edges.equalToSuperview()
-        }
-        
-        scrollView.snp.makeConstraints {
-            make in
-            
-            make.edges.equalToSuperview()
-            make.height.equalTo(maxHeight)
-        }
-        
-        tintView.snp.makeConstraints {
-            make in
-            
-            make.edges.equalToSuperview()
-        }
-        
-        stackView.snp.makeConstraints {
-            make in
-            
-            make.top.bottom.equalToSuperview()
-            if #available(iOS 11.0, *) {
-                make.left.right.equalTo(scrollView.frameLayoutGuide)
-            } else {
-                make.left.right.equalTo(self)
-            }
-        }
+
+		scrollContainerConstraints = [
+			scrollContainer.leftAnchor.constraint(equalTo: effectView.leftAnchor),
+			effectView.rightAnchor.constraint(equalTo: scrollContainer.rightAnchor),
+			scrollContainer.topAnchor.constraint(equalTo: effectView.topAnchor),
+			effectView.bottomAnchor.constraint(equalTo: scrollContainer.bottomAnchor)
+			]
+		NSLayoutConstraint.activate(scrollContainerConstraints)
+		
+		scrollViewConstraints = [
+			scrollView.leftAnchor.constraint(equalTo: scrollContainer.leftAnchor),
+			scrollContainer.rightAnchor.constraint(equalTo: scrollView.rightAnchor),
+			scrollView.topAnchor.constraint(equalTo: scrollContainer.topAnchor),
+			scrollContainer.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+			scrollView.heightAnchor.constraint(equalToConstant: maxHeight)
+		]
+		NSLayoutConstraint.activate(scrollViewConstraints)
+		
+		NSLayoutConstraint.activate([
+			shadowView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: -20),
+			self.rightAnchor.constraint(equalTo: shadowView.rightAnchor, constant: -20),
+			shadowView.topAnchor.constraint(equalTo: self.topAnchor, constant: -20),
+			self.bottomAnchor.constraint(equalTo: shadowView.bottomAnchor, constant: -20),
+			
+			effectView.leftAnchor.constraint(equalTo: self.leftAnchor),
+			self.rightAnchor.constraint(equalTo: effectView.rightAnchor),
+			effectView.topAnchor.constraint(equalTo: self.topAnchor),
+			self.bottomAnchor.constraint(equalTo: effectView.bottomAnchor),
+
+			tintView.leftAnchor.constraint(equalTo: effectView.leftAnchor),
+			effectView.rightAnchor.constraint(equalTo: tintView.rightAnchor),
+			tintView.topAnchor.constraint(equalTo: effectView.topAnchor),
+			effectView.bottomAnchor.constraint(equalTo: tintView.bottomAnchor),
+			
+			stackView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+			scrollView.bottomAnchor.constraint(equalTo: stackView.bottomAnchor)
+			])
+
+		if #available(iOS 11.0, *) {
+			NSLayoutConstraint.activate([
+				stackView.leftAnchor.constraint(equalTo: scrollView.frameLayoutGuide.leftAnchor),
+				stackView.rightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.rightAnchor)
+				])
+		} else {
+			NSLayoutConstraint.activate([
+				stackView.leftAnchor.constraint(equalTo: self.leftAnchor),
+				stackView.rightAnchor.constraint(equalTo: self.rightAnchor)
+				])
+		}
         
         stackView.axis = .vertical
         stackView.alignment = .fill
@@ -298,33 +317,44 @@ class MenuContents: UIView {
         }
         
         //We're rendering under the superview, so let's do that
-        titleLabel.snp.remakeConstraints {
-            make in
-            
-            make.center.equalTo(superview)
-        }
-        
         scrollView.scrollIndicatorInsets = UIEdgeInsets(top: radius + 6, left: 0, bottom: 6, right: 0)
         scrollView.contentInset = UIEdgeInsets(top: radius + 6, left: 0, bottom: 6, right: 0)
         
         let insetAdjustment = scrollView.contentInset.top + scrollView.contentInset.bottom
         
-        scrollContainer.snp.remakeConstraints {
-            make in
-            make.left.bottom.right.equalToSuperview()
-            make.top.equalTo(superview.snp.bottom)
-        }
-        
-        scrollView.snp.remakeConstraints {
-            make in
-            
-            make.width.greaterThanOrEqualTo(superview.snp.width).offset(100)
-            make.bottom.equalToSuperview()
-            make.height.equalTo(stackView).offset(insetAdjustment).priority(.low)
-            make.height.lessThanOrEqualTo(maxHeight).priority(.required)
-            make.top.left.right.equalToSuperview()
-        }
-        
+		let svHeightConstraint = scrollView.heightAnchor.constraint(equalTo: stackView.heightAnchor, multiplier: 1, constant: insetAdjustment)
+		svHeightConstraint.priority = .defaultLow
+		let svMaxHeightConstraint = scrollView.heightAnchor.constraint(lessThanOrEqualToConstant: maxHeight)
+		svMaxHeightConstraint.priority = .required
+
+		NSLayoutConstraint.deactivate(scrollContainerConstraints)
+		scrollContainerConstraints = [
+			scrollContainer.leftAnchor.constraint(equalTo: effectView.leftAnchor),
+			scrollContainer.rightAnchor.constraint(equalTo: effectView.rightAnchor),
+			effectView.bottomAnchor.constraint(equalTo: scrollContainer.bottomAnchor),
+			scrollContainer.topAnchor.constraint(equalTo: superview.bottomAnchor),
+		]
+		NSLayoutConstraint.activate(scrollContainerConstraints)
+
+		NSLayoutConstraint.deactivate(scrollViewConstraints)
+		scrollViewConstraints = [
+			scrollView.widthAnchor.constraint(greaterThanOrEqualTo: superview.widthAnchor, multiplier: 1, constant: 100),
+			svHeightConstraint,
+			svMaxHeightConstraint,
+			scrollView.leftAnchor.constraint(equalTo: scrollContainer.leftAnchor),
+			scrollContainer.rightAnchor.constraint(equalTo: scrollView.rightAnchor),
+			scrollView.topAnchor.constraint(equalTo: scrollContainer.topAnchor),
+			scrollContainer.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+		]
+		NSLayoutConstraint.activate(scrollViewConstraints)
+
+		NSLayoutConstraint.deactivate(titleLabelConstraints)
+		titleLabelConstraints = [
+			titleLabel.centerXAnchor.constraint(equalTo: superview.centerXAnchor),
+			titleLabel.centerYAnchor.constraint(equalTo: superview.centerYAnchor)
+		]
+		NSLayoutConstraint.activate(titleLabelConstraints)
+		
         applyContentMask()
     }
     

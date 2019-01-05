@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SnapKit
 
 //MARK: - MenuView
 
@@ -57,59 +56,59 @@ public class MenuView: UIView, MenuThemeable {
         self.theme = theme
         
         super.init(frame: .zero)
+		translatesAutoresizingMaskIntoConstraints = false
+		
+		gestureBarView.translatesAutoresizingMaskIntoConstraints = false
+		tintView.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.text = title
         titleLabel.textColor = theme.darkTintColor
         titleLabel.textAlignment = .center
         titleLabel.setContentHuggingPriority(.required, for: .horizontal)
-        
+		titleLabel.translatesAutoresizingMaskIntoConstraints = false
+		
         let clippingView = UIView()
+		clippingView.translatesAutoresizingMaskIntoConstraints = false
         clippingView.clipsToBounds = true
         
         addSubview(clippingView)
         
-        clippingView.snp.makeConstraints {
-            make in
-            
-            make.edges.equalToSuperview()
-        }
-        
         clippingView.layer.cornerRadius = 8.0
         
         clippingView.addSubview(effectView)
-        
-        effectView.snp.makeConstraints {
-            make in
-            
-            make.edges.equalToSuperview()
-        }
-        
+
+		effectView.translatesAutoresizingMaskIntoConstraints = false
         effectView.contentView.addSubview(tintView)
         effectView.contentView.addSubview(titleLabel)
         effectView.contentView.addSubview(gestureBarView)
         
-        tintView.snp.makeConstraints {
-            make in
-            
-            make.edges.equalToSuperview()
-        }
-        
-        titleLabel.snp.makeConstraints {
-            make in
-            
-            make.left.right.equalToSuperview().inset(12)
-            make.centerY.equalToSuperview()
-        }
+		NSLayoutConstraint.activate([
+			clippingView.leftAnchor.constraint(equalTo: self.leftAnchor),
+			self.rightAnchor.constraint(equalTo: clippingView.rightAnchor),
+			clippingView.topAnchor.constraint(equalTo: self.topAnchor),
+			self.bottomAnchor.constraint(equalTo: clippingView.bottomAnchor),
+
+			effectView.leftAnchor.constraint(equalTo: clippingView.leftAnchor),
+			clippingView.rightAnchor.constraint(equalTo: effectView.rightAnchor),
+			effectView.topAnchor.constraint(equalTo: clippingView.topAnchor),
+			clippingView.bottomAnchor.constraint(equalTo: effectView.bottomAnchor),
+
+			tintView.leftAnchor.constraint(equalTo: effectView.leftAnchor),
+			effectView.rightAnchor.constraint(equalTo: tintView.rightAnchor),
+			tintView.topAnchor.constraint(equalTo: effectView.topAnchor),
+			effectView.bottomAnchor.constraint(equalTo: tintView.bottomAnchor),
+			
+			titleLabel.leftAnchor.constraint(equalTo: effectView.leftAnchor, constant: 12),
+			effectView.rightAnchor.constraint(equalTo: titleLabel.rightAnchor, constant: 12),
+			titleLabel.centerYAnchor.constraint(equalTo: effectView.centerYAnchor),
+			
+			gestureBarView.centerXAnchor.constraint(equalTo: effectView.centerXAnchor),
+			gestureBarView.heightAnchor.constraint(equalToConstant: 2),
+			gestureBarView.widthAnchor.constraint(equalToConstant: 20),
+			effectView.bottomAnchor.constraint(equalTo: gestureBarView.bottomAnchor, constant: 3)
+			])
         
         gestureBarView.layer.cornerRadius = 1.0
-        gestureBarView.snp.makeConstraints {
-            make in
-            
-            make.centerX.equalToSuperview()
-            make.height.equalTo(2)
-            make.width.equalTo(20)
-            make.bottom.equalToSuperview().inset(3)
-        }
         
         longPress = UILongPressGestureRecognizer(target: self, action: #selector(longPressGesture(_:)))
         longPress.minimumPressDuration = 0.0
@@ -209,19 +208,23 @@ public class MenuView: UIView, MenuThemeable {
         }
         
         addSubview(contents)
-        
-        contents.snp.makeConstraints {
-            make in
-        
-            switch contentAlignment {
-            case .left:
-                make.top.right.equalToSuperview()
-            case .right:
-                make.top.left.equalToSuperview()
-            case .center:
-                make.top.centerX.equalToSuperview()
-            }
-        }
+
+		switch contentAlignment {
+		case .left:
+			NSLayoutConstraint.activate([
+				contents.topAnchor.constraint(equalTo: self.topAnchor),
+				contents.rightAnchor.constraint(equalTo: self.rightAnchor)
+				])
+		case .right:
+			NSLayoutConstraint.activate([
+				contents.topAnchor.constraint(equalTo: self.topAnchor),
+				contents.leftAnchor.constraint(equalTo: self.leftAnchor)
+				])
+		case .center:
+			NSLayoutConstraint.activate([
+				contents.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+				])
+		}
         
         effectView.isHidden = true
         

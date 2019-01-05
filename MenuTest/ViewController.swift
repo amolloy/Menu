@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SnapKit
 import Menu
 
 class ViewController: UIViewController {
@@ -43,14 +42,11 @@ class ViewController: UIViewController {
         
         menu.tintColor = .black
         
-        menu.snp.makeConstraints {
-            make in
-            
-            make.center.equalToSuperview()
-            
-            //Menus don't have an intrinsic height
-            make.height.equalTo(40)
-        }
+		NSLayoutConstraint.activate([
+			menu.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+			menu.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+			menu.heightAnchor.constraint(equalToConstant: 40)
+			])
     }
 
 

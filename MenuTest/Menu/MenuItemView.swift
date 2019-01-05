@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import SnapKit
 
 public protocol MenuItemView {
     var highlighted: Bool { get set }
@@ -35,16 +34,18 @@ class SeparatorMenuItemView: UIView, MenuItemView, MenuThemeable {
     
     init() {
         super.init(frame: .zero)
-        
+        translatesAutoresizingMaskIntoConstraints = false
+		separatorLine.translatesAutoresizingMaskIntoConstraints = false
+		
         addSubview(separatorLine)
         
-        separatorLine.snp.makeConstraints {
-            make in
-            
-            make.left.right.equalToSuperview()
-            make.height.equalTo(1)
-            make.top.bottom.equalToSuperview().inset(2)
-        }
+		NSLayoutConstraint.activate([
+			separatorLine.leftAnchor.constraint(equalTo: self.leftAnchor),
+			self.rightAnchor.constraint(equalTo: separatorLine.rightAnchor),
+			separatorLine.heightAnchor.constraint(equalToConstant: 1),
+			separatorLine.topAnchor.constraint(equalTo: self.topAnchor, constant: 2),
+			self.bottomAnchor.constraint(equalTo: separatorLine.bottomAnchor, constant: 2)
+			])
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -88,16 +89,13 @@ extension ShortcutMenuItem.Shortcut {
         
         return symbols.map {
             let label = UILabel()
+			label.translatesAutoresizingMaskIntoConstraints = false
             label.text = $0.renderedShortcut
             label.textAlignment = .right
             
             if $0 == key {
                 label.textAlignment = .left
-                label.snp.makeConstraints {
-                    make in
-                    
-                    make.width.greaterThanOrEqualTo(label.snp.height)
-                }
+				label.widthAnchor.constraint(greaterThanOrEqualTo: label.heightAnchor).isActive = true
             }
             
             return label
@@ -116,6 +114,9 @@ public class ShortcutMenuItemView: UIView, MenuItemView, MenuThemeable {
     
     public init(item: ShortcutMenuItem) {
         super.init(frame: .zero)
+		translatesAutoresizingMaskIntoConstraints = false
+		nameLabel.translatesAutoresizingMaskIntoConstraints = false
+		shortcutStack.translatesAutoresizingMaskIntoConstraints = false
         
         nameLabel.text = item.name
         
@@ -123,29 +124,24 @@ public class ShortcutMenuItemView: UIView, MenuItemView, MenuThemeable {
 
         nameLabel.textColor = .black
         
-        nameLabel.snp.makeConstraints {
-            make in
-            
-            make.top.bottom.equalToSuperview().inset(4)
-            make.left.equalToSuperview().offset(10)
-            make.right.lessThanOrEqualToSuperview().offset(-10)
-        }
-        
+		var constraints = [NSLayoutConstraint]()
+		constraints.append(contentsOf: [
+			nameLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 4),
+			nameLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -4),
+			nameLabel.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 10),
+			nameLabel.rightAnchor.constraint(lessThanOrEqualTo: self.rightAnchor, constant:-10)
+			])
+		        
         if let shortcut = item.shortcut, ShortcutMenuItem.displayShortcuts {
             addSubview(shortcutStack)
             
-            nameLabel.snp.makeConstraints {
-                make in
-                
-                make.right.lessThanOrEqualTo(shortcutStack.snp.left).offset(-12)
-            }
-            
-            shortcutStack.snp.makeConstraints {
-                make in
-                
-                make.top.bottom.equalToSuperview().inset(2)
-                make.right.equalToSuperview().inset(6)
-            }
+			constraints.append(contentsOf:[
+				nameLabel.rightAnchor.constraint(lessThanOrEqualTo: shortcutStack.leftAnchor, constant: -12),
+				
+				shortcutStack.topAnchor.constraint(equalTo: self.topAnchor, constant: 2),
+				shortcutStack.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -2),
+				self.rightAnchor.constraint(equalTo: shortcutStack.rightAnchor, constant: -6)
+				])
             
             shortcutStack.setContentHuggingPriority(.required, for: .horizontal)
             
@@ -154,26 +150,27 @@ public class ShortcutMenuItemView: UIView, MenuItemView, MenuThemeable {
             for (index, label) in labels.enumerated() {
                 shortcutStack.addSubview(label)
                 
-                label.snp.makeConstraints {
-                    make in
-                    
-                    make.top.bottom.equalToSuperview()
-
-                    if index == 0 {
-                        make.left.equalToSuperview()
-                    } else if index < labels.count - 1 {
-                        make.left.equalTo(labels[index - 1].snp.right).offset(1.0 / UIScreen.main.scale)
-                    }
-                    
-                    if index == labels.count - 1 {
-                        if index > 0 {
-                            make.left.equalTo(labels[index - 1].snp.right).offset(2)
-                        }
-                        make.right.equalToSuperview()
-                    }
-                }
+				constraints.append(contentsOf:[
+					label.topAnchor.constraint(equalTo: shortcutStack.topAnchor),
+					label.bottomAnchor.constraint(equalTo: shortcutStack.bottomAnchor)
+					])
+				
+				if index == 0 {
+					constraints.append(label.leftAnchor.constraint(equalTo: shortcutStack.leftAnchor))
+				} else if index < labels.count - 1 {
+					constraints.append(label.leftAnchor.constraint(equalTo: labels[index - 1].rightAnchor, constant: 1.0 / UIScreen.main.scale))
+				}
+				
+				if index == labels.count - 1 {
+					if index > 0 {
+						constraints.append(label.leftAnchor.constraint(equalTo: labels[index - 1].rightAnchor, constant: 2))
+					}
+					constraints.append(label.rightAnchor.constraint(equalTo: shortcutStack.rightAnchor))
+				}
             }
         }
+		
+		NSLayoutConstraint.activate(constraints)
     }
     
     public required init?(coder aDecoder: NSCoder) {
