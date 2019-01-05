@@ -6,6 +6,5 @@ target 'MenuTest' do
   use_frameworks!
 
   # Pods for MenuTest
-  pod 'SnapKit'
   pod 'Menu', :path => '.'
 end

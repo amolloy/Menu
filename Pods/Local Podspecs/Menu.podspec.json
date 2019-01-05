@@ -26,10 +26,5 @@
   "source_files": [
     "MenuTest/Menu/*.swift",
     "MenuTest/Util/*.swift"
-  ],
-  "dependencies": {
-    "SnapKit": [
-
-    ]
-  }
+  ]
 }

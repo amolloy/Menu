@@ -104,6 +104,7 @@
 				DB1ED21D21DE148A00AEB658 /* Frameworks */,
 				DB1ED21E21DE148A00AEB658 /* Resources */,
 				C802E4B097B010FFF0CC6DCF /* [CP] Embed Pods Frameworks */,
+				70CC8BEF2A6B66642A50DEAC /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -166,6 +167,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		70CC8BEF2A6B66642A50DEAC /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MenuTest/Pods-MenuTest-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		C4C950883F7C3444554841D4 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -192,12 +212,10 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-MenuTest/Pods-MenuTest-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Menu/Menu.framework",
-				"${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Menu.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SnapKit.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
