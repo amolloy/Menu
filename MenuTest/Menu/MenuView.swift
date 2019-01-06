@@ -191,7 +191,7 @@ public class MenuView: UIView, MenuThemeable {
         }
     }
     
-    private func showContents() {
+    public func showContents() {
         NotificationCenter.default.post(name: MenuView.menuWillPresent, object: self)
         
         let contents = MenuContents(name: title, items: itemsSource(), theme: theme)
@@ -239,7 +239,7 @@ public class MenuView: UIView, MenuThemeable {
         contents.focusInitialViewIfNecessary()
     }
     
-    private func hideContents(animated: Bool) {
+    public func hideContents(animated: Bool) {
         let contentsView = contents
         contents = nil
         
