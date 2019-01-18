@@ -128,6 +128,12 @@ public class MenuView: UIView, MenuThemeable {
     deinit {
         NotificationCenter.default.removeObserver(menuPresentationObserver)
     }
+	
+	public override var forFirstBaselineLayout: UIView {
+		get {
+			return titleLabel
+		}
+	}
     
     //MARK: - Required Init
     
