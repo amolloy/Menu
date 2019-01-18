@@ -27,6 +27,8 @@ class MenuContents: UIView {
     private let scrollView = UIScrollView()
 	private var scrollViewConstraints = [NSLayoutConstraint]()
     
+    var highlightChanged: () -> Void = {}
+    
     let stackView: UIStackView
     
     private let titleLabel = UILabel()
@@ -84,7 +86,7 @@ class MenuContents: UIView {
     }
     
     private func pointIsInsideTopEdgeScrollingBoundary(_ point: CGPoint) -> Bool {
-        return point.y < scrollView.frame.minY + 40 && isScrollable
+        return point.y < 70 && isScrollable
     }
     
     private func updateHighlightedPosition(_ point: CGPoint) {
@@ -248,6 +250,15 @@ class MenuContents: UIView {
         stackView.alignment = .fill
         stackView.distribution = .equalSpacing
         stackView.spacing = 0
+        
+        menuItemViews.forEach {
+            var item = $0
+            
+            item.didHighlight = {
+                [weak self] in
+                self?.highlightChanged()
+            }
+        }
         
         applyTheme(theme)
     }

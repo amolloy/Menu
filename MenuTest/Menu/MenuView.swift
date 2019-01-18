@@ -10,7 +10,7 @@ import UIKit
 
 //MARK: - MenuView
 
-public class MenuView: UIView, MenuThemeable {
+public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
     
     public static let menuWillPresent = Notification.Name("CodeaMenuWillPresent")
     
@@ -18,6 +18,7 @@ public class MenuView: UIView, MenuThemeable {
     private let gestureBarView = UIView()
     private let tintView = UIView()
     private let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+    private let feedback = UISelectionFeedbackGenerator()
     
     public var title: String {
         didSet {
@@ -31,6 +32,7 @@ public class MenuView: UIView, MenuThemeable {
     private var contents: MenuContents?
     private var theme: MenuTheme
     private var longPress: UILongPressGestureRecognizer!
+    private var tapGesture: UITapGestureRecognizer!
     
     private let itemsSource: () -> [MenuItem]
     
@@ -112,7 +114,12 @@ public class MenuView: UIView, MenuThemeable {
         
         longPress = UILongPressGestureRecognizer(target: self, action: #selector(longPressGesture(_:)))
         longPress.minimumPressDuration = 0.0
+        longPress.delegate = self
         addGestureRecognizer(longPress)
+        
+        tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapped(_:)))
+        tapGesture.delegate = self
+        addGestureRecognizer(tapGesture)
         
         applyTheme(theme)
         
@@ -175,26 +182,41 @@ public class MenuView: UIView, MenuThemeable {
             contents?.isInteractiveDragActive = false
             
             if gestureEnd.timeIntervalSince(gestureStart) > 0.3 {
-                if let contents = contents {
-                    let point = convert(sender.location(in: self), to: contents)
-                    
-                    if contents.point(inside: point, with: nil) {
-                        contents.selectPosition(point, completion: {
-                            [weak self] menuItem in
-                            
-                            self?.hideContents(animated: true)
-                            
-                            menuItem.performAction()
-                        })
-                    } else {
-                        hideContents(animated: true)
-                    }
-                }
+                selectPositionAndHideContents(sender)
             }
             
         default:
             ()
         }
+    }
+    
+    @objc private func tapped(_ sender: UITapGestureRecognizer) {
+        selectPositionAndHideContents(sender)
+    }
+    
+    private func selectPositionAndHideContents(_ gesture: UIGestureRecognizer) {
+        if let contents = contents {
+            let point = convert(gesture.location(in: self), to: contents)
+            
+            if contents.point(inside: point, with: nil) {
+                contents.selectPosition(point, completion: {
+                    [weak self] menuItem in
+                    
+                    self?.hideContents(animated: true)
+                    
+                    menuItem.performAction()
+                })
+            } else {
+                hideContents(animated: true)
+            }
+        }
+    }
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer == longPress && otherGestureRecognizer == tapGesture {
+            return true
+        }
+        return false
     }
     
     public func showContents() {
@@ -243,6 +265,13 @@ public class MenuView: UIView, MenuThemeable {
         
         contents.generateMaskAndShadow(alignment: contentAlignment)
         contents.focusInitialViewIfNecessary()
+        
+        feedback.prepare()
+        contents.highlightChanged = {
+            [weak self] in
+            
+            self?.feedback.selectionChanged()
+        }
     }
     
     public func hideContents(animated: Bool) {

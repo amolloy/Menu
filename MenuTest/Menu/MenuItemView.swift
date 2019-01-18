@@ -13,6 +13,8 @@ public protocol MenuItemView {
     
     var highlightPosition: CGPoint { get set }
     
+    var didHighlight: () -> Void { get set }
+    
     var initialFocusedRect: CGRect? { get }
     
     var updateLayout: () -> Void { get set }
@@ -57,6 +59,8 @@ class SeparatorMenuItemView: UIView, MenuItemView, MenuThemeable {
     var highlighted: Bool = false
     
     var highlightPosition: CGPoint = .zero
+    
+    var didHighlight: () -> Void = {}
     
     var updateLayout: () -> Void = {}
     
@@ -193,10 +197,16 @@ public class ShortcutMenuItemView: UIView, MenuItemView, MenuThemeable {
     public var highlighted: Bool = false {
         didSet {
             updateHighlightState(highlighted)
+            
+            if highlighted == true && oldValue == false {
+                didHighlight()
+            }
         }
     }
     
     public var highlightPosition: CGPoint = .zero
+    
+    public var didHighlight: () -> Void = {}
     
     public var updateLayout: () -> Void = {}
     

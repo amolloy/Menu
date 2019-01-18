@@ -29,8 +29,8 @@ class ViewController: UIViewController {
                 
                 SeparatorMenuItem(),
                 
-                ShortcutMenuItem(name: "Insert Image", shortcut: ([.command, .alternate], "I"), action: {}),
-                ShortcutMenuItem(name: "Insert Link", shortcut: ([.command, .alternate], "L"), action: {}),
+                ShortcutMenuItem(name: "Insert Image…", shortcut: ([.command, .alternate], "I"), action: {}),
+                ShortcutMenuItem(name: "Insert Link…", shortcut: ([.command, .alternate], "L"), action: {}),
                 
                 SeparatorMenuItem(),
                 
