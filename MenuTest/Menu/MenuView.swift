@@ -133,7 +133,9 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
     }
     
     deinit {
-        NotificationCenter.default.removeObserver(menuPresentationObserver)
+		if let menuPresentationObserver = menuPresentationObserver {
+        	NotificationCenter.default.removeObserver(menuPresentationObserver)
+		}
     }
 	
 	public override var forFirstBaselineLayout: UIView {
